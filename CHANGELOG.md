@@ -1,3 +1,20 @@
+First of all this project had to be switched to typescript - lack of it is the most critical for the project, no type safety means a lot of potential and unforeseen errors
+
+Tailwind css was integrated with scss. I've switched to using only Tailwind, here are the reasons why:
+1) I think colocation of styles makes the code much easier to modify and read + it does not allow such bad practices as relying on cascading in CSS which prevents "bugs" like one that mentioned in the codebase - when you have very deeply nested specific selector which overrides default styles, but which is crucial for the app to work properly. the connection between the requirement and the actual code does not represent the "design" complexity which is bad and leads to "spaghetti code"
+2) ai is better in tailwind
+3) DX is better (subjectively)
+
+Routing was done primitively. I've switched to using @tanstack/router for the typesafe routing and a lot of "battaries" that this library has
+
+There are some "computed" states in the components which might benefit from wrapping into useMemo. However for now I've integrated react-compiler and then the code may be not touched yet still perform much better
+
+Potentially it would be also better to switch to some proven and well tested component libraries like BaseUI or ShadCn instead of creating components from 0
+
+
+
+Removed all the bugs that comments highlighted and also found additional issues. Here's a full list:
+
 main.jsx file:
 readHashPath - function can replace hash and cause route mismatch.
 
