@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
 import PageHeader from "../components/PageHeader.jsx";
+import Panel from "../components/ui/Panel.jsx";
+import Button from "../components/ui/Button.jsx";
+import Input from "../components/ui/Input.jsx";
+import Pill from "../components/ui/Pill.jsx";
+import { Field, FieldLabel, FieldError } from "../components/ui/Field.jsx";
 import { invoices } from "../data/mockData.js";
 
 export default function Billing() {
@@ -25,10 +30,10 @@ export default function Billing() {
         title="Billing"
         description="Invoices, payment state, and discount calculations."
       />
-      <section className="panel billing-summary">
-        <label>
-          Discount
-          <input
+      <Panel className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <Field className="min-w-[200px]">
+          <FieldLabel>Discount</FieldLabel>
+          <Input
             value={discount}
             onChange={(event) => setDiscount(event.target.value)}
             placeholder="500"
@@ -36,31 +41,37 @@ export default function Billing() {
             aria-invalid={discountInvalid}
             aria-describedby={discountInvalid ? "discount-error" : undefined}
           />
-        </label>
-        {discountInvalid && (
-          <p id="discount-error" className="field-error" role="alert">
-            Enter a valid non-negative number.
-          </p>
-        )}
-        <strong>Total: £{total.toLocaleString()}</strong>
-      </section>
-      <div className="invoice-list">
+          {discountInvalid && (
+            <FieldError id="discount-error">
+              Enter a valid non-negative number.
+            </FieldError>
+          )}
+        </Field>
+        <strong className="text-xl">Total: £{total.toLocaleString()}</strong>
+      </Panel>
+      <div className="grid gap-3">
         {rows.map((invoice) => (
-          <article className="invoice-card" key={invoice.id}>
+          <Panel
+            as="article"
+            key={invoice.id}
+            className="grid grid-cols-1 items-center gap-3 sm:grid-cols-[1fr_120px_90px_auto]"
+          >
             <div>
-              <h3>{invoice.id}</h3>
-              <p>{invoice.client}</p>
+              <h3 className="m-0 text-base font-semibold">{invoice.id}</h3>
+              <p className="m-0 text-sm text-[#667085] dark:text-slate-400">
+                {invoice.client}
+              </p>
             </div>
             <strong>£{invoice.amount.toLocaleString()}</strong>
-            <span className={invoice.paid ? "pill paid" : "pill unpaid"}>
+            <Pill tone={invoice.paid ? "success" : "danger"}>
               <span className="sr-only">Payment status: </span>
               {invoice.paid ? "Paid" : "Due"}
-            </span>
-            <button
-              type="button"
+            </Pill>
+            <Button
+              variant="secondary"
               onClick={() =>
-                setRows(
-                  rows.map((row) =>
+                setRows((current) =>
+                  current.map((row) =>
                     row.id === invoice.id ? { ...row, paid: !row.paid } : row,
                   ),
                 )
@@ -68,8 +79,8 @@ export default function Billing() {
               aria-label={`Mark ${invoice.id} as ${invoice.paid ? "unpaid" : "paid"}`}
             >
               {invoice.paid ? "Mark unpaid" : "Mark paid"}
-            </button>
-          </article>
+            </Button>
+          </Panel>
         ))}
       </div>
     </>

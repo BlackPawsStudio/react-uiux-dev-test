@@ -1,15 +1,25 @@
+import clsx from "clsx";
+import Panel from "./ui/Panel.jsx";
+
 export default function StatCard({ label, value, trend }) {
-  const trendClass = trend > 0 ? "good" : trend < 0 ? "bad" : "neutral";
+  const trendClass =
+    trend > 0
+      ? "text-[#047857]"
+      : trend < 0
+        ? "text-[#b42318]"
+        : "text-[#667085]";
   const trendPrefix = trend > 0 ? "+" : "";
 
   return (
-    <article className="stat-card">
-      <p>{label}</p>
-      <strong>{value}</strong>
-      <span className={trendClass}>
+    <Panel as="article" className="p-5">
+      <p className="m-0 mb-3 text-sm text-[#667085] dark:text-slate-400">
+        {label}
+      </p>
+      <strong className="block text-3xl">{value}</strong>
+      <span className={clsx("text-sm font-semibold", trendClass)}>
         {trendPrefix}
         {trend}%
       </span>
-    </article>
+    </Panel>
   );
 }

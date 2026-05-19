@@ -1,6 +1,17 @@
 import { useMemo, useState } from "react";
+import clsx from "clsx";
 import PageHeader from "../components/PageHeader.jsx";
+import Panel from "../components/ui/Panel.jsx";
+import Button from "../components/ui/Button.jsx";
+import Select from "../components/ui/Select.jsx";
+import Checkbox from "../components/ui/Checkbox.jsx";
 import { projects } from "../data/mockData.js";
+
+const statusClass = {
+  Blocked: "font-bold text-[#b42318]",
+  Active: "font-bold text-[#047857]",
+  Paused: "font-bold text-[#b54708]",
+};
 
 export default function Projects({ search }) {
   const [status, setStatus] = useState("All");
@@ -34,8 +45,9 @@ export default function Projects({ search }) {
         title="Projects"
         description="Manage project status, ownership, deadlines, and budget."
       />
-      <section className="toolbar panel">
-        <select
+      <Panel className="mb-4 flex flex-wrap items-center gap-3">
+        <Select
+          className="w-auto min-w-[140px]"
           value={status}
           onChange={(event) => setStatus(event.target.value)}
         >
@@ -43,65 +55,88 @@ export default function Projects({ search }) {
           <option>Active</option>
           <option>Blocked</option>
           <option>Paused</option>
-        </select>
-        <button type="button" onClick={() => setSortAsc(!sortAsc)}>
+        </Select>
+        <Button variant="secondary" onClick={() => setSortAsc(!sortAsc)}>
           Sort by budget ({sortAsc ? "low to high" : "high to low"})
-        </button>
-        <span>{selected.length} selected</span>
-      </section>
-      <section className="panel table-wrap">
+        </Button>
+        <span className="text-sm text-[#667085] dark:text-slate-400">
+          {selected.length} selected
+        </span>
+      </Panel>
+      <Panel className="overflow-auto">
         {visible.length === 0 ? (
-          <p className="empty-state">No projects match your filters.</p>
+          <p className="m-0 text-[#667085] dark:text-slate-400">
+            No projects match your filters.
+          </p>
         ) : (
-          <table className="data-table">
+          <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th scope="col">
+                <th className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
                   <span className="sr-only">Select</span>
                 </th>
-                <th scope="col">Name</th>
-                <th scope="col">Owner</th>
-                <th scope="col">Status</th>
-                <th scope="col">Budget</th>
-                <th scope="col">Due</th>
+                <th className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                  Name
+                </th>
+                <th className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                  Owner
+                </th>
+                <th className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                  Status
+                </th>
+                <th className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                  Budget
+                </th>
+                <th className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                  Due
+                </th>
               </tr>
             </thead>
             <tbody>
               {visible.map((project) => (
                 <tr
                   key={project.id}
-                  className={project.status === "Blocked" ? "danger-row" : ""}
+                  className={clsx(
+                    "transition-colors hover:bg-brand/5",
+                    project.status === "Blocked" &&
+                      "bg-[#fff1f3] dark:bg-[#3f1d2a]",
+                  )}
                   aria-label={
                     project.status === "Blocked"
                       ? `${project.name}, blocked`
                       : undefined
                   }
                 >
-                  <td>
-                    <input
-                      type="checkbox"
+                  <td className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                    <Checkbox
                       checked={selected.includes(project.id)}
                       onChange={() => toggle(project.id)}
                       aria-label={`Select ${project.name}`}
                     />
                   </td>
-                  <td>{project.name}</td>
-                  <td>{project.owner}</td>
-                  <td>
-                    <span
-                      className={`status-text status-${project.status.toLowerCase()}`}
-                    >
+                  <td className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                    {project.name}
+                  </td>
+                  <td className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                    {project.owner}
+                  </td>
+                  <td className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                    <span className={statusClass[project.status] ?? "font-bold"}>
                       {project.status}
                     </span>
                   </td>
-                  <td>£{project.budget}</td>
-                  <td>{project.due}</td>
+                  <td className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                    £{project.budget.toLocaleString()}
+                  </td>
+                  <td className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
+                    {project.due}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-      </section>
+      </Panel>
     </>
   );
 }

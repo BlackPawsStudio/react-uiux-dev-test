@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import PageHeader from "../components/PageHeader.jsx";
+import Panel from "../components/ui/Panel.jsx";
+import Button from "../components/ui/Button.jsx";
+import Input from "../components/ui/Input.jsx";
+import Select from "../components/ui/Select.jsx";
+import Checkbox from "../components/ui/Checkbox.jsx";
+import { Field, FieldLabel } from "../components/ui/Field.jsx";
 
 const defaultSettings = {
   company: "Northstar",
@@ -41,19 +47,19 @@ export default function SettingsPage() {
         title="Settings"
         description="Company preferences with intentionally inconsistent form behavior."
       />
-      <section className="panel settings-form">
-        <label>
-          Company name
-          <input
+      <Panel className="grid max-w-[720px] gap-5">
+        <Field>
+          <FieldLabel>Company name</FieldLabel>
+          <Input
             value={settings.company}
             onChange={(event) =>
               setSettings({ ...settings, company: event.target.value })
             }
           />
-        </label>
-        <label>
-          Timezone
-          <select
+        </Field>
+        <Field>
+          <FieldLabel>Timezone</FieldLabel>
+          <Select
             value={settings.timezone}
             onChange={(event) =>
               setSettings({ ...settings, timezone: event.target.value })
@@ -62,21 +68,18 @@ export default function SettingsPage() {
             <option value="Europe/London">Europe/London</option>
             <option value="America/New_York">America/New_York</option>
             <option value="Asia/Tokyo">Asia/Tokyo</option>
-          </select>
-        </label>
-        <label className="checkbox-line">
-          <input
-            type="checkbox"
-            checked={settings.emails}
-            onChange={(event) =>
-              setSettings({ ...settings, emails: event.target.checked })
-            }
-          />
-          Send email reports
-        </label>
-        <label>
-          Density
-          <select
+          </Select>
+        </Field>
+        <Checkbox
+          label="Send email reports"
+          checked={settings.emails}
+          onChange={(event) =>
+            setSettings({ ...settings, emails: event.target.checked })
+          }
+        />
+        <Field>
+          <FieldLabel>Density</FieldLabel>
+          <Select
             value={settings.density}
             onChange={(event) =>
               setSettings({ ...settings, density: event.target.value })
@@ -85,17 +88,21 @@ export default function SettingsPage() {
             <option>Compact</option>
             <option>Comfortable</option>
             <option>Spacious</option>
-          </select>
-        </label>
-        <button type="button" className="primary-btn" onClick={save}>
-          Save settings
-        </button>
-        {saved && (
-          <p className="toast" role="status" aria-live="polite">
-            Settings saved.
-          </p>
-        )}
-      </section>
+          </Select>
+        </Field>
+        <div className="flex items-center gap-3">
+          <Button onClick={save}>Save settings</Button>
+          {saved && (
+            <p
+              className="m-0 rounded-[14px] bg-[#ecfdf3] px-3 py-2 text-sm text-[#067647] dark:bg-[#14532d] dark:text-[#dcfce7]"
+              role="status"
+              aria-live="polite"
+            >
+              Settings saved.
+            </p>
+          )}
+        </div>
+      </Panel>
     </>
   );
 }

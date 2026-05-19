@@ -12,7 +12,9 @@ import {
   X,
 } from "lucide-react";
 import clsx from "clsx";
-import "./styles/global.scss";
+import "./styles/tailwind.css";
+import Button from "./components/ui/Button.jsx";
+import Input from "./components/ui/Input.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Projects from "./pages/Projects.jsx";
 import Team from "./pages/Team.jsx";
@@ -24,21 +26,11 @@ import NotFound from "./pages/NotFound.jsx";
 
 const routes = [
   { path: "/", label: "Dashboard", icon: Home, component: Dashboard },
-  {
-    path: "/projects",
-    label: "Projects",
-    icon: ShoppingBag,
-    component: Projects,
-  },
+  { path: "/projects", label: "Projects", icon: ShoppingBag, component: Projects },
   { path: "/team", label: "Team", icon: Users, component: Team },
   { path: "/reports", label: "Reports", icon: BarChart3, component: Reports },
   { path: "/billing", label: "Billing", icon: CreditCard, component: Billing },
-  {
-    path: "/settings",
-    label: "Settings",
-    icon: Settings,
-    component: SettingsPage,
-  },
+  { path: "/settings", label: "Settings", icon: Settings, component: SettingsPage },
   { path: "/support", label: "Support", icon: HelpCircle, component: Support },
 ];
 
@@ -108,9 +100,10 @@ function App() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [sidebarOpen]);
 
-  const currentRoute = useMemo(() => {
-    return routes.find((route) => route.path === path);
-  }, [path]);
+  const currentRoute = useMemo(
+    () => routes.find((route) => route.path === path),
+    [path],
+  );
 
   const Page = currentRoute?.component ?? NotFound;
   const showSearch = SEARCHABLE_PATHS.has(path);
@@ -120,39 +113,53 @@ function App() {
   }, [showSearch]);
 
   return (
-    <div className="app-shell">
+    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[280px_1fr]">
       {sidebarOpen && (
         <button
           type="button"
-          className="sidebar-backdrop"
+          className="fixed inset-0 z-[15] cursor-pointer border-0 bg-slate-900/45 p-0 lg:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-label="Close menu"
         />
       )}
-      <aside className={clsx("sidebar", sidebarOpen && "sidebar--open")}>
-        <div className="brand-block">
-          <div className="brand-logo">N</div>
+      <aside
+        className={clsx(
+          "z-20 flex flex-col gap-6 bg-gray-900 p-6 text-white",
+          "lg:sticky lg:top-0 lg:h-screen",
+          "max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:w-[290px] max-lg:-translate-x-[120%] max-lg:transition-transform max-lg:duration-200 motion-reduce:transition-none",
+          sidebarOpen && "max-lg:translate-x-0",
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <div className="grid h-[42px] w-[42px] place-items-center rounded-[14px] bg-gradient-to-br from-violet-600 to-cyan-500 font-black">
+            N
+          </div>
           <div>
             <strong>Northstar</strong>
-            <span>Ops Console</span>
+            <span className="block text-gray-400">Ops Console</span>
           </div>
-          <button
-            className="icon-only close-mobile"
+          <Button
+            variant="icon"
+            className="ml-auto text-white hover:bg-white/10 lg:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close menu"
           >
             <X size={18} />
-          </button>
+          </Button>
         </div>
-        <nav className="nav-list" aria-label="Main navigation">
+        <nav className="grid gap-2" aria-label="Main navigation">
           {routes.map((route) => {
             const Icon = route.icon;
+            const active = path === route.path;
             return (
               <a
                 key={route.path}
-                className={clsx("nav-item", path === route.path && "active")}
+                className={clsx(
+                  "flex items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-gray-300 no-underline transition-colors hover:bg-white/10 hover:text-white",
+                  active && "bg-white/10 text-white",
+                )}
                 href={route.path}
-                aria-current={path === route.path ? "page" : undefined}
+                aria-current={active ? "page" : undefined}
                 onClick={(event) => {
                   event.preventDefault();
                   navigate(route.path);
@@ -165,44 +172,44 @@ function App() {
             );
           })}
         </nav>
-        <div className="sidebar-footer">
-          <p>Candidate task</p>
-          <small>
+        <div className="mt-auto rounded-[18px] border border-white/10 p-4">
+          <p className="m-0">Candidate task</p>
+          <small className="block text-gray-400">
             Find and fix UX, CSS, routing, state, and accessibility issues.
           </small>
         </div>
       </aside>
 
-      <main className="main-area" ref={mainRef} tabIndex={-1}>
-        <header className="topbar">
-          <button
-            className="icon-only menu-btn"
+      <main className="min-w-0" ref={mainRef} tabIndex={-1}>
+        <header className="sticky top-0 z-[5] flex h-[76px] items-center gap-4 bg-white/70 px-4 backdrop-blur-md lg:px-7 dark:bg-slate-900/75">
+          <Button
+            variant="icon"
+            className="lg:hidden"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label={sidebarOpen ? "Close menu" : "Open menu"}
             aria-expanded={sidebarOpen}
           >
             <Menu size={20} />
-          </button>
-          {showSearch ? (
-            <div className="search-box">
-              <input
+          </Button>
+          <div className="min-w-0 flex-1">
+            {showSearch && (
+              <Input
                 value={globalSearch}
                 onChange={(event) => setGlobalSearch(event.target.value)}
                 placeholder="Search..."
                 aria-label="Search"
               />
-            </div>
-          ) : (
-            <div className="topbar-spacer" />
-          )}
-          <button
-            className="theme-toggle"
+            )}
+          </div>
+          <Button
+            variant="primary"
+            className="whitespace-nowrap max-[520px]:px-3 max-[520px]:py-2"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {theme === "dark" ? "Light" : "Dark"} mode
-          </button>
+          </Button>
         </header>
-        <section className="page-frame">
+        <section className="p-[18px] lg:p-[30px]">
           <Page {...(showSearch ? { search: globalSearch } : {})} />
         </section>
       </main>

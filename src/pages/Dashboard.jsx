@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import PageHeader from "../components/PageHeader.jsx";
 import StatCard from "../components/StatCard.jsx";
-import BuggyModal from "../components/BuggyModal.jsx";
+import Panel from "../components/ui/Panel.jsx";
+import Button from "../components/ui/Button.jsx";
+import Input from "../components/ui/Input.jsx";
+import Textarea from "../components/ui/Textarea.jsx";
+import Modal from "../components/ui/Modal.jsx";
 import { projects, invoices } from "../data/mockData.js";
 
 export default function Dashboard({ search }) {
@@ -10,6 +14,7 @@ export default function Dashboard({ search }) {
     "Review blocked work, confirm invoices, and update client-facing status.",
   );
   const searchTerm = (search || "").toLowerCase();
+
   const totalBudget = useMemo(
     () => projects.reduce((sum, project) => sum + project.budget, 0),
     [],
@@ -36,16 +41,10 @@ export default function Dashboard({ search }) {
         title="Executive Dashboard"
         description="A compact operations dashboard with many hidden UI and state issues for candidates to improve."
         action={
-          <button
-            type="button"
-            className="primary-btn"
-            onClick={() => setOpen(true)}
-          >
-            Create summary
-          </button>
+          <Button onClick={() => setOpen(true)} className="mt-4">Create summary</Button>
         }
       />
-      <div className="stats-grid">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Active projects" value={projects.length} trend={12} />
         <StatCard
           label="Total budget"
@@ -59,52 +58,59 @@ export default function Dashboard({ search }) {
         />
         <StatCard label="Avg health" value={`${avgHealth}%`} trend={-11} />
       </div>
-      <div className="content-grid two-col">
-        <section className="panel oversized-panel">
-          <h2>Project health</h2>
-          <div className="health-list">
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[1.6fr_0.9fr]">
+        <Panel>
+          <h2 className="text-xl font-bold">Project health</h2>
+          <div>
             {filtered.length === 0 ? (
-              <p className="empty-state">No projects match your search.</p>
+              <p className="m-0 text-[#667085] dark:text-slate-400">
+                No projects match your search.
+              </p>
             ) : (
               filtered.map((project) => (
-                <div className="health-row" key={project.id}>
+                <div
+                  key={project.id}
+                  className="my-3.5 grid grid-cols-1 items-center gap-3 sm:grid-cols-[180px_1fr_50px]"
+                >
                   <span>{project.name}</span>
-                  <div className="health-bar">
-                    <i style={{ width: `${project.health}%` }} />
+                  <div className="h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-slate-800">
+                    <i
+                      className="block h-full bg-brand"
+                      style={{ width: `${project.health}%` }}
+                    />
                   </div>
                   <b>{project.health}%</b>
                 </div>
               ))
             )}
           </div>
-        </section>
-        <section className="panel notes-panel">
-          <h2>Today</h2>
+        </Panel>
+        <Panel>
+          <h2 className="text-xl font-bold">Today</h2>
           <form
-            onSubmit={(event) => {
-              event.preventDefault();
-            }}
+            className="grid gap-2"
+            onSubmit={(event) => event.preventDefault()}
           >
-            <label htmlFor="dashboard-notes">Notes</label>
-            <textarea
+            <label htmlFor="dashboard-notes" className="block font-semibold">
+              Notes
+            </label>
+            <Textarea
               id="dashboard-notes"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
             />
           </form>
-        </section>
+        </Panel>
       </div>
-      <BuggyModal
+      <Modal
         title="Generate summary"
         description="Name your summary and generate a snapshot of current operations data."
         open={open}
         onClose={() => setOpen(false)}
       >
-        <input placeholder="Summary name" aria-label="Summary name" />
-        <button type="button" className="primary-btn">
-          Generate
-        </button>
-      </BuggyModal>
+        <Input placeholder="Summary name" aria-label="Summary name" />
+        <Button>Generate</Button>
+      </Modal>
     </>
   );
 }
