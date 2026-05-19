@@ -1,29 +1,40 @@
 import { useState } from "react";
 import clsx from "clsx";
-import PageHeader from "../components/PageHeader.jsx";
-import Panel from "../components/ui/Panel.jsx";
-import Button from "../components/ui/Button.jsx";
-import Input from "../components/ui/Input.jsx";
-import Select from "../components/ui/Select.jsx";
-import { FieldError } from "../components/ui/Field.jsx";
+import PageHeader from "../components/PageHeader";
+import Panel from "../components/ui/Panel";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Select from "../components/ui/Select";
+import { FieldError } from "../components/ui/Field";
 
-const priorities = ["Low", "Medium", "High"];
+type Priority = "Low" | "Medium" | "High";
 
-const priorityClass = {
+interface Ticket {
+  id: number;
+  title: string;
+  priority: Priority;
+  resolved: boolean;
+}
+
+const priorities: Priority[] = ["Low", "Medium", "High"];
+
+const priorityClass: Record<Priority, string> = {
   High: "font-bold text-[#b42318]",
   Medium: "font-bold text-[#b54708]",
   Low: "font-bold text-[#067647]",
 };
 
+const initialTickets: Ticket[] = [
+  { id: 1, title: "Client cannot export report", priority: "High", resolved: false },
+  { id: 2, title: "Invoice duplicate after refresh", priority: "Medium", resolved: false },
+  { id: 3, title: "Mobile menu overlaps content", priority: "Low", resolved: false },
+];
+
 export default function Support() {
-  const [tickets, setTickets] = useState([
-    { id: 1, title: "Client cannot export report", priority: "High", resolved: false },
-    { id: 2, title: "Invoice duplicate after refresh", priority: "Medium", resolved: false },
-    { id: 3, title: "Mobile menu overlaps content", priority: "Low", resolved: false },
-  ]);
+  const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
   const [title, setTitle] = useState("");
-  const [priority, setPriority] = useState("Low");
-  const [editingId, setEditingId] = useState(null);
+  const [priority, setPriority] = useState<Priority>("Low");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [titleError, setTitleError] = useState("");
 
@@ -42,12 +53,12 @@ export default function Support() {
     setPriority("Low");
   }
 
-  function startEdit(ticket) {
+  function startEdit(ticket: Ticket) {
     setEditingId(ticket.id);
     setEditTitle(ticket.title);
   }
 
-  function saveEdit(id) {
+  function saveEdit(id: number) {
     const trimmed = editTitle.trim();
     if (!trimmed) return;
     setTickets((current) =>
@@ -59,7 +70,7 @@ export default function Support() {
     setEditTitle("");
   }
 
-  function resolveTicket(id) {
+  function resolveTicket(id: number) {
     setTickets((current) =>
       current.map((ticket) =>
         ticket.id === id ? { ...ticket, resolved: true } : ticket,
@@ -67,7 +78,7 @@ export default function Support() {
     );
   }
 
-  function deleteTicket(id) {
+  function deleteTicket(id: number) {
     setTickets((current) => current.filter((ticket) => ticket.id !== id));
   }
 
@@ -118,7 +129,7 @@ export default function Support() {
           <Select
             className="w-auto min-w-[140px]"
             value={priority}
-            onChange={(event) => setPriority(event.target.value)}
+            onChange={(event) => setPriority(event.target.value as Priority)}
             aria-label="Priority"
           >
             {priorities.map((level) => (
@@ -157,10 +168,7 @@ export default function Support() {
               <strong>{ticket.title}</strong>
             )}
             <span
-              className={clsx(
-                priorityClass[ticket.priority] ?? "font-bold",
-                "text-sm",
-              )}
+              className={clsx(priorityClass[ticket.priority], "text-sm")}
             >
               {ticket.priority}
               {ticket.resolved ? " · Resolved" : ""}

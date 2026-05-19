@@ -1,10 +1,15 @@
 import clsx from "clsx";
-import { forwardRef } from "react";
+import { forwardRef, type SelectHTMLAttributes } from "react";
 
 const chevron =
   "url(\"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")";
 
-const Select = forwardRef(function Select({ className, children, ...rest }, ref) {
+export type SelectProps = SelectHTMLAttributes<HTMLSelectElement>;
+
+const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
+  { className, children, ...rest },
+  ref,
+) {
   return (
     <select
       ref={ref}

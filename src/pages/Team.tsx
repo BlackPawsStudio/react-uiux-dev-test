@@ -1,15 +1,19 @@
 import { useMemo, useState } from "react";
 import clsx from "clsx";
-import PageHeader from "../components/PageHeader.jsx";
-import Panel from "../components/ui/Panel.jsx";
-import Button from "../components/ui/Button.jsx";
-import Checkbox from "../components/ui/Checkbox.jsx";
-import { team } from "../data/mockData.js";
+import PageHeader from "../components/PageHeader";
+import Panel from "../components/ui/Panel";
+import Button from "../components/ui/Button";
+import Checkbox from "../components/ui/Checkbox";
+import { team, type TeamMember } from "../data/mockData";
 
-export default function Team({ search }) {
-  const [members, setMembers] = useState(team);
+export interface TeamProps {
+  search?: string;
+}
+
+export default function Team({ search }: TeamProps) {
+  const [members, setMembers] = useState<TeamMember[]>(team);
   const [showInactive, setShowInactive] = useState(false);
-  const searchTerm = (search || "").toLowerCase();
+  const searchTerm = (search ?? "").toLowerCase();
 
   const visible = useMemo(() => {
     return members.filter((member) => {
@@ -20,7 +24,7 @@ export default function Team({ search }) {
     });
   }, [members, showInactive, searchTerm]);
 
-  function removeMember(id) {
+  function removeMember(id: number) {
     const member = members.find((item) => item.id === id);
     if (!member) return;
     if (!window.confirm(`Remove ${member.name} from the team?`)) return;

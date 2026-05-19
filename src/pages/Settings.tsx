@@ -1,24 +1,34 @@
 import { useEffect, useState } from "react";
-import PageHeader from "../components/PageHeader.jsx";
-import Panel from "../components/ui/Panel.jsx";
-import Button from "../components/ui/Button.jsx";
-import Input from "../components/ui/Input.jsx";
-import Select from "../components/ui/Select.jsx";
-import Checkbox from "../components/ui/Checkbox.jsx";
-import { Field, FieldLabel } from "../components/ui/Field.jsx";
+import PageHeader from "../components/PageHeader";
+import Panel from "../components/ui/Panel";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Select from "../components/ui/Select";
+import Checkbox from "../components/ui/Checkbox";
+import { Field, FieldLabel } from "../components/ui/Field";
 
-const defaultSettings = {
+type Timezone = "Europe/London" | "America/New_York" | "Asia/Tokyo";
+type Density = "Compact" | "Comfortable" | "Spacious";
+
+interface Settings {
+  company: string;
+  timezone: Timezone;
+  emails: boolean;
+  density: Density;
+}
+
+const defaultSettings: Settings = {
   company: "Northstar",
   timezone: "Europe/London",
   emails: true,
   density: "Comfortable",
 };
 
-function loadSettings() {
+function loadSettings(): Settings {
   try {
     const stored = localStorage.getItem("settings");
     return stored
-      ? { ...defaultSettings, ...JSON.parse(stored) }
+      ? { ...defaultSettings, ...(JSON.parse(stored) as Partial<Settings>) }
       : defaultSettings;
   } catch {
     return defaultSettings;
@@ -26,11 +36,11 @@ function loadSettings() {
 }
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState(loadSettings);
+  const [settings, setSettings] = useState<Settings>(loadSettings);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!saved) return undefined;
+    if (!saved) return;
     const timer = setTimeout(() => setSaved(false), 3000);
     return () => clearTimeout(timer);
   }, [saved]);
@@ -62,7 +72,10 @@ export default function SettingsPage() {
           <Select
             value={settings.timezone}
             onChange={(event) =>
-              setSettings({ ...settings, timezone: event.target.value })
+              setSettings({
+                ...settings,
+                timezone: event.target.value as Timezone,
+              })
             }
           >
             <option value="Europe/London">Europe/London</option>
@@ -82,12 +95,15 @@ export default function SettingsPage() {
           <Select
             value={settings.density}
             onChange={(event) =>
-              setSettings({ ...settings, density: event.target.value })
+              setSettings({
+                ...settings,
+                density: event.target.value as Density,
+              })
             }
           >
-            <option>Compact</option>
-            <option>Comfortable</option>
-            <option>Spacious</option>
+            <option value="Compact">Compact</option>
+            <option value="Comfortable">Comfortable</option>
+            <option value="Spacious">Spacious</option>
           </Select>
         </Field>
         <div className="flex items-center gap-3">

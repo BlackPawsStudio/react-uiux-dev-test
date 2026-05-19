@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
-import PageHeader from "../components/PageHeader.jsx";
-import Panel from "../components/ui/Panel.jsx";
-import Button from "../components/ui/Button.jsx";
-import Input from "../components/ui/Input.jsx";
-import Pill from "../components/ui/Pill.jsx";
-import { Field, FieldLabel, FieldError } from "../components/ui/Field.jsx";
-import { invoices } from "../data/mockData.js";
+import PageHeader from "../components/PageHeader";
+import Panel from "../components/ui/Panel";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Pill from "../components/ui/Pill";
+import { Field, FieldLabel, FieldError } from "../components/ui/Field";
+import { invoices, type Invoice } from "../data/mockData";
 
 export default function Billing() {
-  const [rows, setRows] = useState(invoices);
+  const [rows, setRows] = useState<Invoice[]>(invoices);
   const [discount, setDiscount] = useState("");
 
   const discountValue = discount === "" ? 0 : Number(discount);

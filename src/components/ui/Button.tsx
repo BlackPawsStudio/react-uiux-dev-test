@@ -1,9 +1,12 @@
 import clsx from "clsx";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "icon";
 
 const base =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 
-const variants = {
+const variants: Record<ButtonVariant, string> = {
   primary:
     "h-12 rounded-[14px] border-0 bg-brand px-4 text-white hover:opacity-90",
   secondary:
@@ -16,17 +19,22 @@ const variants = {
     "h-10 w-10 rounded-full border-0 bg-transparent text-inherit hover:bg-black/5 dark:hover:bg-white/10",
 };
 
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  children?: ReactNode;
+}
+
 export default function Button({
   variant = "primary",
   type = "button",
   className,
   children,
   ...rest
-}) {
+}: ButtonProps) {
   return (
     <button
       type={type}
-      className={clsx(base, variants[variant] ?? variants.primary, className)}
+      className={clsx(base, variants[variant], className)}
       {...rest}
     >
       {children}

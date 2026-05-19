@@ -1,36 +1,42 @@
 import { useMemo, useState } from "react";
 import clsx from "clsx";
-import PageHeader from "../components/PageHeader.jsx";
-import Panel from "../components/ui/Panel.jsx";
-import Button from "../components/ui/Button.jsx";
-import Select from "../components/ui/Select.jsx";
-import Checkbox from "../components/ui/Checkbox.jsx";
-import { projects } from "../data/mockData.js";
+import PageHeader from "../components/PageHeader";
+import Panel from "../components/ui/Panel";
+import Button from "../components/ui/Button";
+import Select from "../components/ui/Select";
+import Checkbox from "../components/ui/Checkbox";
+import { projects, type ProjectStatus } from "../data/mockData";
 
-const statusClass = {
+const statusClass: Record<ProjectStatus, string> = {
   Blocked: "font-bold text-[#b42318]",
   Active: "font-bold text-[#047857]",
   Paused: "font-bold text-[#b54708]",
 };
 
-export default function Projects({ search }) {
-  const [status, setStatus] = useState("All");
+type StatusFilter = "All" | ProjectStatus;
+
+export interface ProjectsProps {
+  search?: string;
+}
+
+export default function Projects({ search }: ProjectsProps) {
+  const [status, setStatus] = useState<StatusFilter>("All");
   const [sortAsc, setSortAsc] = useState(true);
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState<number[]>([]);
 
   const visible = useMemo(() => {
     let rows = projects;
     if (status !== "All")
       rows = rows.filter((project) => project.status === status);
     rows = rows.filter((project) =>
-      project.name.toLowerCase().includes((search || "").toLowerCase()),
+      project.name.toLowerCase().includes((search ?? "").toLowerCase()),
     );
-    return rows.sort((a, b) =>
+    return [...rows].sort((a, b) =>
       sortAsc ? a.budget - b.budget : b.budget - a.budget,
     );
   }, [status, sortAsc, search]);
 
-  function toggle(id) {
+  function toggle(id: number) {
     setSelected((current) =>
       current.includes(id)
         ? current.filter((item) => item !== id)
@@ -49,12 +55,12 @@ export default function Projects({ search }) {
         <Select
           className="w-auto min-w-[140px]"
           value={status}
-          onChange={(event) => setStatus(event.target.value)}
+          onChange={(event) => setStatus(event.target.value as StatusFilter)}
         >
-          <option>All</option>
-          <option>Active</option>
-          <option>Blocked</option>
-          <option>Paused</option>
+          <option value="All">All</option>
+          <option value="Active">Active</option>
+          <option value="Blocked">Blocked</option>
+          <option value="Paused">Paused</option>
         </Select>
         <Button variant="secondary" onClick={() => setSortAsc(!sortAsc)}>
           Sort by budget ({sortAsc ? "low to high" : "high to low"})
@@ -121,7 +127,7 @@ export default function Projects({ search }) {
                     {project.owner}
                   </td>
                   <td className="border-b border-gray-200 px-3.5 py-3.5 text-left dark:border-slate-700">
-                    <span className={statusClass[project.status] ?? "font-bold"}>
+                    <span className={statusClass[project.status]}>
                       {project.status}
                     </span>
                   </td>

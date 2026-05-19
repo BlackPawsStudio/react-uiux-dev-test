@@ -1,7 +1,13 @@
 import clsx from "clsx";
-import Panel from "./ui/Panel.jsx";
+import Panel from "./ui/Panel";
 
-export default function StatCard({ label, value, trend }) {
+export interface StatCardProps {
+  label: string;
+  value: string | number;
+  trend: number;
+}
+
+export default function StatCard({ label, value, trend }: StatCardProps) {
   const trendClass =
     trend > 0
       ? "text-[#047857]"

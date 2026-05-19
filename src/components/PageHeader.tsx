@@ -1,4 +1,18 @@
-export default function PageHeader({ eyebrow, title, description, action }) {
+import type { ReactNode } from "react";
+
+export interface PageHeaderProps {
+  eyebrow: ReactNode;
+  title: ReactNode;
+  description?: ReactNode;
+  action?: ReactNode;
+}
+
+export default function PageHeader({
+  eyebrow,
+  title,
+  description,
+  action,
+}: PageHeaderProps) {
   return (
     <header className="mb-4 flex flex-col items-start justify-between gap-4 max-[520px]:block sm:flex-row sm:items-end">
       <div>
@@ -8,9 +22,11 @@ export default function PageHeader({ eyebrow, title, description, action }) {
         <h1 className="my-1.5 text-[clamp(2rem,4vw,3.25rem)] tracking-tighter">
           {title}
         </h1>
-        <p className="m-0 max-w-[760px] text-[#667085] dark:text-slate-400">
-          {description}
-        </p>
+        {description && (
+          <p className="m-0 max-w-[760px] text-[#667085] dark:text-slate-400">
+            {description}
+          </p>
+        )}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </header>

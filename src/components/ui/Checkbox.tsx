@@ -1,8 +1,14 @@
 import clsx from "clsx";
-import { forwardRef } from "react";
+import { forwardRef, type InputHTMLAttributes, type ReactNode } from "react";
 import { Check } from "lucide-react";
 
-const Checkbox = forwardRef(function Checkbox(
+export interface CheckboxProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
+  label?: ReactNode;
+  labelClassName?: string;
+}
+
+const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
   { className, label, labelClassName, id, ...rest },
   ref,
 ) {

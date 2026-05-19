@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentType,
+} from "react";
 import { createRoot } from "react-dom/client";
 import {
   Home,
@@ -10,33 +16,57 @@ import {
   CreditCard,
   Menu,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import clsx from "clsx";
 import "./styles/tailwind.css";
-import Button from "./components/ui/Button.jsx";
-import Input from "./components/ui/Input.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
-import Projects from "./pages/Projects.jsx";
-import Team from "./pages/Team.jsx";
-import Reports from "./pages/Reports.jsx";
-import Billing from "./pages/Billing.jsx";
-import SettingsPage from "./pages/Settings.jsx";
-import Support from "./pages/Support.jsx";
-import NotFound from "./pages/NotFound.jsx";
+import Button from "./components/ui/Button";
+import Input from "./components/ui/Input";
+import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
+import Team from "./pages/Team";
+import Reports from "./pages/Reports";
+import Billing from "./pages/Billing";
+import SettingsPage from "./pages/Settings";
+import Support from "./pages/Support";
+import NotFound from "./pages/NotFound";
 
-const routes = [
+interface PageProps {
+  search?: string;
+}
+
+interface Route {
+  path: string;
+  label: string;
+  icon: LucideIcon;
+  component: ComponentType<PageProps>;
+}
+
+const routes: Route[] = [
   { path: "/", label: "Dashboard", icon: Home, component: Dashboard },
-  { path: "/projects", label: "Projects", icon: ShoppingBag, component: Projects },
+  {
+    path: "/projects",
+    label: "Projects",
+    icon: ShoppingBag,
+    component: Projects,
+  },
   { path: "/team", label: "Team", icon: Users, component: Team },
   { path: "/reports", label: "Reports", icon: BarChart3, component: Reports },
   { path: "/billing", label: "Billing", icon: CreditCard, component: Billing },
-  { path: "/settings", label: "Settings", icon: Settings, component: SettingsPage },
+  {
+    path: "/settings",
+    label: "Settings",
+    icon: Settings,
+    component: SettingsPage,
+  },
   { path: "/support", label: "Support", icon: HelpCircle, component: Support },
 ];
 
-const SEARCHABLE_PATHS = new Set(["/", "/projects", "/team"]);
+const SEARCHABLE_PATHS = new Set<string>(["/", "/projects", "/team"]);
 
-function normalizePath(path) {
+type Theme = "light" | "dark";
+
+function normalizePath(path: string | null | undefined): string {
   const pathOnly = (path || "/").split("?")[0] || "/";
   if (pathOnly === "/") return "/";
   return pathOnly.startsWith("/")
@@ -44,18 +74,18 @@ function normalizePath(path) {
     : `/${pathOnly}`;
 }
 
-function readPath() {
+function readPath(): string {
   return normalizePath(window.location.pathname);
 }
 
-function readLegacyHashPath() {
+function readLegacyHashPath(): string | null {
   const raw = window.location.hash.replace("#", "");
   if (!raw) return null;
   return normalizePath(raw);
 }
 
 function App() {
-  const [path, setPath] = useState(() => {
+  const [path, setPath] = useState<string>(() => {
     const legacy = readLegacyHashPath();
     if (legacy) {
       window.history.replaceState(null, "", legacy);
@@ -64,11 +94,13 @@ function App() {
     return readPath();
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const [theme, setTheme] = useState<Theme>(
+    (localStorage.getItem("theme") as Theme | null) ?? "light",
+  );
   const [globalSearch, setGlobalSearch] = useState("");
-  const mainRef = useRef(null);
+  const mainRef = useRef<HTMLElement>(null);
 
-  function navigate(nextPath) {
+  function navigate(nextPath: string) {
     const normalized = normalizePath(nextPath);
     if (normalized !== window.location.pathname) {
       window.history.pushState(null, "", normalized);
@@ -93,7 +125,7 @@ function App() {
 
   useEffect(() => {
     if (!sidebarOpen) return;
-    const onKeyDown = (event) => {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSidebarOpen(false);
     };
     window.addEventListener("keydown", onKeyDown);
@@ -105,7 +137,7 @@ function App() {
     [path],
   );
 
-  const Page = currentRoute?.component ?? NotFound;
+  const Page: ComponentType<PageProps> = currentRoute?.component ?? NotFound;
   const showSearch = SEARCHABLE_PATHS.has(path);
 
   useEffect(() => {
@@ -184,7 +216,7 @@ function App() {
         <header className="sticky top-0 z-[5] flex h-[76px] items-center gap-4 bg-white/70 px-4 backdrop-blur-md lg:px-7 dark:bg-slate-900/75">
           <Button
             variant="icon"
-            className="lg:hidden"
+            className="lg:hidden justify-start"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label={sidebarOpen ? "Close menu" : "Open menu"}
             aria-expanded={sidebarOpen}
@@ -217,4 +249,6 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Root element #root not found");
+createRoot(rootElement).render(<App />);

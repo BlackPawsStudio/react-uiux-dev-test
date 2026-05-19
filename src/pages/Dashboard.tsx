@@ -1,19 +1,23 @@
 import { useMemo, useState } from "react";
-import PageHeader from "../components/PageHeader.jsx";
-import StatCard from "../components/StatCard.jsx";
-import Panel from "../components/ui/Panel.jsx";
-import Button from "../components/ui/Button.jsx";
-import Input from "../components/ui/Input.jsx";
-import Textarea from "../components/ui/Textarea.jsx";
-import Modal from "../components/ui/Modal.jsx";
-import { projects, invoices } from "../data/mockData.js";
+import PageHeader from "../components/PageHeader";
+import StatCard from "../components/StatCard";
+import Panel from "../components/ui/Panel";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Textarea from "../components/ui/Textarea";
+import Modal from "../components/ui/Modal";
+import { projects, invoices } from "../data/mockData";
 
-export default function Dashboard({ search }) {
+export interface DashboardProps {
+  search?: string;
+}
+
+export default function Dashboard({ search }: DashboardProps) {
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState(
     "Review blocked work, confirm invoices, and update client-facing status.",
   );
-  const searchTerm = (search || "").toLowerCase();
+  const searchTerm = (search ?? "").toLowerCase();
 
   const totalBudget = useMemo(
     () => projects.reduce((sum, project) => sum + project.budget, 0),
@@ -41,7 +45,9 @@ export default function Dashboard({ search }) {
         title="Executive Dashboard"
         description="A compact operations dashboard with many hidden UI and state issues for candidates to improve."
         action={
-          <Button onClick={() => setOpen(true)} className="mt-4">Create summary</Button>
+          <Button onClick={() => setOpen(true)} className="mt-4">
+            Create summary
+          </Button>
         }
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

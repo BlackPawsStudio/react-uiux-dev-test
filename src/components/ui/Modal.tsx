@@ -1,7 +1,16 @@
-import { useEffect, useId } from "react";
+import { useEffect, useId, type ReactNode } from "react";
 import { X } from "lucide-react";
 import clsx from "clsx";
-import Button from "./Button.jsx";
+import Button from "./Button";
+
+export interface ModalProps {
+  title: ReactNode;
+  description?: ReactNode;
+  children?: ReactNode;
+  open: boolean;
+  onClose: () => void;
+  className?: string;
+}
 
 export default function Modal({
   title,
@@ -10,13 +19,13 @@ export default function Modal({
   open,
   onClose,
   className,
-}) {
+}: ModalProps) {
   const titleId = useId();
   const descriptionId = useId();
 
   useEffect(() => {
     if (!open) return undefined;
-    function closeOnEscape(event) {
+    function closeOnEscape(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
     }
     window.addEventListener("keydown", closeOnEscape);
@@ -32,7 +41,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-30 grid place-items-center bg-slate-900/60 dark:bg-slate-900/80 p-4"
+      className="fixed inset-0 z-30 grid place-items-center bg-slate-900/60 p-4 dark:bg-slate-900/80"
       onClick={onClose}
     >
       <section
@@ -42,7 +51,7 @@ export default function Modal({
         aria-describedby={description ? descriptionId : undefined}
         onClick={(event) => event.stopPropagation()}
         className={clsx(
-          "relative w-full max-w-[520px] rounded-[28px] bg-white p-7 text-ink shadow-2xl dark:bg-slate-900 dark:text-slate-100 dark:border-brand dark:border",
+          "relative w-full max-w-[520px] rounded-[28px] bg-white p-7 text-ink shadow-2xl dark:border dark:border-brand dark:bg-slate-900 dark:text-slate-100",
           className,
         )}
       >

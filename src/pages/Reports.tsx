@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import PageHeader from "../components/PageHeader.jsx";
-import Panel from "../components/ui/Panel.jsx";
-import { reportRows } from "../data/mockData.js";
+import PageHeader from "../components/PageHeader";
+import Panel from "../components/ui/Panel";
+import { reportRows } from "../data/mockData";
 
 export default function Reports() {
   const maxRevenue = useMemo(
@@ -16,10 +16,7 @@ export default function Reports() {
         title="Reports"
         description="Revenue, churn, and user trends shown with deliberately fragile charts."
       />
-      <Panel
-        className="mb-4 h-[360px]"
-        aria-labelledby="revenue-chart-title"
-      >
+      <Panel className="mb-4 h-[360px]" aria-labelledby="revenue-chart-title">
         <h2 id="revenue-chart-title" className="text-xl font-bold">
           Revenue
         </h2>
@@ -31,7 +28,7 @@ export default function Reports() {
           {reportRows.map((row) => (
             <div
               key={row.month}
-              className="relative w-20 min-h-[20px] rounded-t-[14px] rounded-b text-white bg-brand"
+              className="relative min-h-[20px] w-20 rounded-t-[14px] rounded-b bg-brand text-white"
               style={{ height: `${(row.revenue / maxRevenue) * 100}%` }}
               title={`${row.month}: £${row.revenue.toLocaleString()}`}
             >
