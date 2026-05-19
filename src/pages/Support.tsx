@@ -1,13 +1,22 @@
 import { useState } from "react";
 import clsx from "clsx";
+import { useForm } from "@tanstack/react-form";
 import PageHeader from "../components/PageHeader";
 import Panel from "../components/ui/Panel";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
-import { FieldError } from "../components/ui/Field";
-
-type Priority = "Low" | "Medium" | "High";
+import {
+  FormFieldErrors,
+  hasErrors,
+} from "../components/ui/form/FormFieldErrors";
+import {
+  prioritySchema,
+  ticketEditSchema,
+  ticketSchema,
+  type Priority,
+  type TicketValues,
+} from "../schemas/ticket";
 
 interface Ticket {
   id: number;
@@ -16,7 +25,7 @@ interface Ticket {
   resolved: boolean;
 }
 
-const priorities: Priority[] = ["Low", "Medium", "High"];
+const priorities: Priority[] = prioritySchema.options;
 
 const priorityClass: Record<Priority, string> = {
   High: "font-bold text-[#b42318]",
@@ -30,45 +39,28 @@ const initialTickets: Ticket[] = [
   { id: 3, title: "Mobile menu overlaps content", priority: "Low", resolved: false },
 ];
 
+const defaultTicket: TicketValues = { title: "", priority: "Low" };
+
 export default function Support() {
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
-  const [title, setTitle] = useState("");
-  const [priority, setPriority] = useState<Priority>("Low");
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [titleError, setTitleError] = useState("");
 
-  function addTicket() {
-    const trimmed = title.trim();
-    if (!trimmed) {
-      setTitleError("Enter a ticket title.");
-      return;
-    }
-    setTitleError("");
-    setTickets((current) => [
-      { id: Date.now(), title: trimmed, priority, resolved: false },
-      ...current,
-    ]);
-    setTitle("");
-    setPriority("Low");
-  }
-
-  function startEdit(ticket: Ticket) {
-    setEditingId(ticket.id);
-    setEditTitle(ticket.title);
-  }
-
-  function saveEdit(id: number) {
-    const trimmed = editTitle.trim();
-    if (!trimmed) return;
-    setTickets((current) =>
-      current.map((ticket) =>
-        ticket.id === id ? { ...ticket, title: trimmed } : ticket,
-      ),
-    );
-    setEditingId(null);
-    setEditTitle("");
-  }
+  const addForm = useForm({
+    defaultValues: defaultTicket,
+    validators: { onChange: ticketSchema, onSubmit: ticketSchema },
+    onSubmit: ({ value, formApi }) => {
+      setTickets((current) => [
+        {
+          id: Date.now(),
+          title: value.title.trim(),
+          priority: value.priority,
+          resolved: false,
+        },
+        ...current,
+      ]);
+      formApi.reset();
+    },
+  });
 
   function resolveTicket(id: number) {
     setTickets((current) =>
@@ -80,6 +72,15 @@ export default function Support() {
 
   function deleteTicket(id: number) {
     setTickets((current) => current.filter((ticket) => ticket.id !== id));
+  }
+
+  function saveEdit(id: number, title: string) {
+    setTickets((current) =>
+      current.map((ticket) =>
+        ticket.id === id ? { ...ticket, title } : ticket,
+      ),
+    );
+    setEditingId(null);
   }
 
   return (
@@ -112,37 +113,54 @@ export default function Support() {
           className="flex flex-wrap items-start gap-3"
           onSubmit={(event) => {
             event.preventDefault();
-            addTicket();
+            event.stopPropagation();
+            void addForm.handleSubmit();
           }}
         >
-          <Input
-            className="min-w-[160px] flex-1"
-            value={title}
-            onChange={(event) => {
-              setTitle(event.target.value);
-              if (titleError) setTitleError("");
-            }}
-            placeholder="New ticket title"
-            aria-invalid={Boolean(titleError)}
-            aria-describedby={titleError ? "ticket-title-error" : undefined}
-          />
-          <Select
-            className="w-auto min-w-[140px]"
-            value={priority}
-            onChange={(event) => setPriority(event.target.value as Priority)}
-            aria-label="Priority"
-          >
-            {priorities.map((level) => (
-              <option key={level} value={level}>
-                {level}
-              </option>
-            ))}
-          </Select>
-          <Button type="submit">Add ticket</Button>
+          <addForm.Field name="title">
+            {(field) => (
+              <div className="flex min-w-[160px] flex-1 flex-col gap-1">
+                <Input
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  placeholder="New ticket title"
+                  aria-invalid={hasErrors(field)}
+                  aria-describedby={
+                    hasErrors(field) ? "ticket-title-error" : undefined
+                  }
+                />
+                <FormFieldErrors field={field} id="ticket-title-error" />
+              </div>
+            )}
+          </addForm.Field>
+          <addForm.Field name="priority">
+            {(field) => (
+              <Select
+                className="w-auto min-w-[140px]"
+                value={field.state.value}
+                onChange={(event) =>
+                  field.handleChange(event.target.value as Priority)
+                }
+                onBlur={field.handleBlur}
+                aria-label="Priority"
+              >
+                {priorities.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </addForm.Field>
+          <addForm.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <Button type="submit" disabled={isSubmitting}>
+                Add ticket
+              </Button>
+            )}
+          </addForm.Subscribe>
         </form>
-        <FieldError id="ticket-title-error" className="mt-2">
-          {titleError}
-        </FieldError>
       </Panel>
       <section className="grid gap-3" aria-live="polite">
         {tickets.map((ticket) => (
@@ -155,27 +173,24 @@ export default function Support() {
             )}
           >
             {editingId === ticket.id ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <Input
-                  className="min-w-[160px] flex-1"
-                  value={editTitle}
-                  onChange={(event) => setEditTitle(event.target.value)}
-                  aria-label="Edit ticket title"
-                />
-                <Button onClick={() => saveEdit(ticket.id)}>Save</Button>
-              </div>
+              <TicketEditForm
+                initialTitle={ticket.title}
+                onCancel={() => setEditingId(null)}
+                onSave={(title) => saveEdit(ticket.id, title)}
+              />
             ) : (
               <strong>{ticket.title}</strong>
             )}
-            <span
-              className={clsx(priorityClass[ticket.priority], "text-sm")}
-            >
+            <span className={clsx(priorityClass[ticket.priority], "text-sm")}>
               {ticket.priority}
               {ticket.resolved ? " · Resolved" : ""}
             </span>
             <div className="flex flex-wrap gap-2 sm:col-span-2">
               {editingId !== ticket.id && (
-                <Button variant="secondary" onClick={() => startEdit(ticket)}>
+                <Button
+                  variant="secondary"
+                  onClick={() => setEditingId(ticket.id)}
+                >
                   Edit
                 </Button>
               )}
@@ -195,5 +210,61 @@ export default function Support() {
         ))}
       </section>
     </>
+  );
+}
+
+interface TicketEditFormProps {
+  initialTitle: string;
+  onSave: (title: string) => void;
+  onCancel: () => void;
+}
+
+function TicketEditForm({ initialTitle, onSave, onCancel }: TicketEditFormProps) {
+  const form = useForm({
+    defaultValues: { title: initialTitle },
+    validators: { onChange: ticketEditSchema, onSubmit: ticketEditSchema },
+    onSubmit: ({ value }) => onSave(value.title.trim()),
+  });
+
+  return (
+    <form
+      className="flex flex-wrap items-start gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
+    >
+      <form.Field name="title">
+        {(field) => (
+          <div className="flex min-w-[160px] flex-1 flex-col gap-1">
+            <Input
+              value={field.state.value}
+              onChange={(event) => field.handleChange(event.target.value)}
+              onBlur={field.handleBlur}
+              aria-label="Edit ticket title"
+              aria-invalid={hasErrors(field)}
+              aria-describedby={
+                hasErrors(field) ? `edit-title-error-${field.name}` : undefined
+              }
+            />
+            <FormFieldErrors
+              field={field}
+              id={`edit-title-error-${field.name}`}
+            />
+          </div>
+        )}
+      </form.Field>
+      <form.Subscribe selector={(state) => state.canSubmit}>
+        {(canSubmit) => (
+          <Button type="submit" disabled={!canSubmit}>
+            Save
+          </Button>
+        )}
+      </form.Subscribe>
+      <Button type="button" variant="secondary" onClick={onCancel}>
+        Cancel
+      </Button>
+    </form>
   );
 }

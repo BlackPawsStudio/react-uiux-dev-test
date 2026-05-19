@@ -1,27 +1,33 @@
 import { useMemo, useState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 import PageHeader from "../components/PageHeader";
 import Panel from "../components/ui/Panel";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Pill from "../components/ui/Pill";
-import { Field, FieldLabel, FieldError } from "../components/ui/Field";
+import { Field, FieldLabel } from "../components/ui/Field";
+import {
+  FormFieldErrors,
+  hasErrors,
+} from "../components/ui/form/FormFieldErrors";
 import { invoices, type Invoice } from "../data/mockData";
+import { billingSchema, parseDiscount } from "../schemas/billing";
 
 export default function Billing() {
   const [rows, setRows] = useState<Invoice[]>(invoices);
-  const [discount, setDiscount] = useState("");
 
-  const discountValue = discount === "" ? 0 : Number(discount);
-  const discountInvalid =
-    discount !== "" && (!Number.isFinite(discountValue) || discountValue < 0);
+  const form = useForm({
+    defaultValues: { discount: "" },
+    validators: { onChange: billingSchema },
+  });
+
+  const discountValue = useStore(form.store, (state) => state.values.discount);
 
   const subtotal = useMemo(
     () => rows.reduce((sum, row) => sum + row.amount, 0),
     [rows],
   );
-  const total = discountInvalid
-    ? subtotal
-    : Math.max(0, subtotal - discountValue);
+  const total = Math.max(0, subtotal - parseDiscount(discountValue));
 
   return (
     <>
@@ -31,22 +37,25 @@ export default function Billing() {
         description="Invoices, payment state, and discount calculations."
       />
       <Panel className="mb-5 flex flex-wrap items-end justify-between gap-4">
-        <Field className="min-w-[200px]">
-          <FieldLabel>Discount</FieldLabel>
-          <Input
-            value={discount}
-            onChange={(event) => setDiscount(event.target.value)}
-            placeholder="500"
-            inputMode="decimal"
-            aria-invalid={discountInvalid}
-            aria-describedby={discountInvalid ? "discount-error" : undefined}
-          />
-          {discountInvalid && (
-            <FieldError id="discount-error">
-              Enter a valid non-negative number.
-            </FieldError>
+        <form.Field name="discount">
+          {(field) => (
+            <Field className="min-w-[200px]">
+              <FieldLabel>Discount</FieldLabel>
+              <Input
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+                onBlur={field.handleBlur}
+                placeholder="500"
+                inputMode="decimal"
+                aria-invalid={hasErrors(field)}
+                aria-describedby={
+                  hasErrors(field) ? "discount-error" : undefined
+                }
+              />
+              <FormFieldErrors field={field} id="discount-error" />
+            </Field>
           )}
-        </Field>
+        </form.Field>
         <strong className="text-xl">Total: £{total.toLocaleString()}</strong>
       </Panel>
       <div className="grid gap-3">

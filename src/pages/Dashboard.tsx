@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useForm } from "@tanstack/react-form";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
 import Panel from "../components/ui/Panel";
@@ -6,8 +7,14 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Textarea from "../components/ui/Textarea";
 import Modal from "../components/ui/Modal";
+import { Field, FieldLabel } from "../components/ui/Field";
+import {
+  FormFieldErrors,
+  hasErrors,
+} from "../components/ui/form/FormFieldErrors";
 import { projects, invoices } from "../data/mockData";
 import { useSearch } from "../contexts/SearchContext";
+import { summarySchema } from "../schemas/summary";
 
 export default function Dashboard() {
   const search = useSearch();
@@ -112,9 +119,59 @@ export default function Dashboard() {
         open={open}
         onClose={() => setOpen(false)}
       >
-        <Input placeholder="Summary name" aria-label="Summary name" />
-        <Button>Generate</Button>
+        {open && <SummaryForm onComplete={() => setOpen(false)} />}
       </Modal>
     </>
+  );
+}
+
+interface SummaryFormProps {
+  onComplete: () => void;
+}
+
+function SummaryForm({ onComplete }: SummaryFormProps) {
+  const form = useForm({
+    defaultValues: { name: "" },
+    validators: { onChange: summarySchema, onSubmit: summarySchema },
+    onSubmit: () => {
+      onComplete();
+    },
+  });
+
+  return (
+    <form
+      className="grid gap-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
+    >
+      <form.Field name="name">
+        {(field) => (
+          <Field>
+            <FieldLabel>Summary name</FieldLabel>
+            <Input
+              value={field.state.value}
+              onChange={(event) => field.handleChange(event.target.value)}
+              onBlur={field.handleBlur}
+              aria-label="Summary name"
+              aria-invalid={hasErrors(field)}
+              aria-describedby={
+                hasErrors(field) ? "summary-name-error" : undefined
+              }
+            />
+            <FormFieldErrors field={field} id="summary-name-error" />
+          </Field>
+        )}
+      </form.Field>
+      <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+        {([canSubmit, isSubmitting]) => (
+          <Button type="submit" disabled={!canSubmit}>
+            {isSubmitting ? "Generating…" : "Generate"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }

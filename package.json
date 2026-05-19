@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "latest",
+    "@tanstack/react-form": "^1.32.0",
     "@tanstack/react-router": "^1.170.4",
     "@tanstack/router-plugin": "^1.168.6",
     "@vitejs/plugin-react": "latest",
@@ -24,7 +25,8 @@
     "sass": "latest",
     "tailwindcss": "latest",
     "typography-stylecss": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "zod": "^4.4.3"
   },
   "type": "module",
   "devDependencies": {
