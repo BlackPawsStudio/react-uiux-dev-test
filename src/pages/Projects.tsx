@@ -6,6 +6,7 @@ import Button from "../components/ui/Button";
 import Select from "../components/ui/Select";
 import Checkbox from "../components/ui/Checkbox";
 import { projects, type ProjectStatus } from "../data/mockData";
+import { useSearch } from "../contexts/SearchContext";
 
 const statusClass: Record<ProjectStatus, string> = {
   Blocked: "font-bold text-[#b42318]",
@@ -15,11 +16,8 @@ const statusClass: Record<ProjectStatus, string> = {
 
 type StatusFilter = "All" | ProjectStatus;
 
-export interface ProjectsProps {
-  search?: string;
-}
-
-export default function Projects({ search }: ProjectsProps) {
+export default function Projects() {
+  const search = useSearch();
   const [status, setStatus] = useState<StatusFilter>("All");
   const [sortAsc, setSortAsc] = useState(true);
   const [selected, setSelected] = useState<number[]>([]);
@@ -29,7 +27,7 @@ export default function Projects({ search }: ProjectsProps) {
     if (status !== "All")
       rows = rows.filter((project) => project.status === status);
     rows = rows.filter((project) =>
-      project.name.toLowerCase().includes((search ?? "").toLowerCase()),
+      project.name.toLowerCase().includes(search.toLowerCase()),
     );
     return [...rows].sort((a, b) =>
       sortAsc ? a.budget - b.budget : b.budget - a.budget,

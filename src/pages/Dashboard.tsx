@@ -7,17 +7,15 @@ import Input from "../components/ui/Input";
 import Textarea from "../components/ui/Textarea";
 import Modal from "../components/ui/Modal";
 import { projects, invoices } from "../data/mockData";
+import { useSearch } from "../contexts/SearchContext";
 
-export interface DashboardProps {
-  search?: string;
-}
-
-export default function Dashboard({ search }: DashboardProps) {
+export default function Dashboard() {
+  const search = useSearch();
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState(
     "Review blocked work, confirm invoices, and update client-facing status.",
   );
-  const searchTerm = (search ?? "").toLowerCase();
+  const searchTerm = search.toLowerCase();
 
   const totalBudget = useMemo(
     () => projects.reduce((sum, project) => sum + project.budget, 0),

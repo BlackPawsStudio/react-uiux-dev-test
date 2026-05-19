@@ -1,7 +1,9 @@
+import { useNavigate } from "@tanstack/react-router";
 import PageHeader from "../components/PageHeader";
 import Button from "../components/ui/Button";
 
 export default function NotFound() {
+  const navigate = useNavigate();
   return (
     <PageHeader
       eyebrow="Error"
@@ -10,10 +12,7 @@ export default function NotFound() {
       action={
         <Button
           variant="secondary"
-          onClick={() => {
-            window.history.pushState(null, "", "/");
-            window.dispatchEvent(new PopStateEvent("popstate"));
-          }}
+          onClick={() => navigate({ to: "/" })}
         >
           Back to dashboard
         </Button>

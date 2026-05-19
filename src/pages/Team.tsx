@@ -5,15 +5,13 @@ import Panel from "../components/ui/Panel";
 import Button from "../components/ui/Button";
 import Checkbox from "../components/ui/Checkbox";
 import { team, type TeamMember } from "../data/mockData";
+import { useSearch } from "../contexts/SearchContext";
 
-export interface TeamProps {
-  search?: string;
-}
-
-export default function Team({ search }: TeamProps) {
+export default function Team() {
+  const search = useSearch();
   const [members, setMembers] = useState<TeamMember[]>(team);
   const [showInactive, setShowInactive] = useState(false);
-  const searchTerm = (search ?? "").toLowerCase();
+  const searchTerm = search.toLowerCase();
 
   const visible = useMemo(() => {
     return members.filter((member) => {
